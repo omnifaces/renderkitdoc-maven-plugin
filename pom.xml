@@ -8,7 +8,51 @@
     <packaging>maven-plugin</packaging>
 
     <name>renderkitdoc-maven-plugin</name>
+    
+    <description>
+        A maven plug-in to create render kit docs from a faces-config file.
+        Based on renderkitdoc generation from Mojarra JSF Tools.
+     </description>
     <url>http://omnifaces.org</url>
+    <organization>
+        <name>OmniFaces</name>
+        <url>http://omnifaces.org</url>
+    </organization>
+    <inceptionYear>2018</inceptionYear>
+
+    <developers>
+        <developer>
+            <id>arjan.tijms</id>
+            <name>Arjan Tijms</name>
+            <email>arjan.tijms@gmail.com</email>
+        </developer>
+    </developers>
+
+     <licenses>
+        <license>
+            <name>EPL 2.0</name>
+            <url>http://www.eclipse.org/legal/epl-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+        <license>
+            <name>GPL2 w/ CPE</name>
+            <url>https://www.gnu.org/software/classpath/license.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    
+     <scm>
+        <url>https://github.com/omnifaces/renderkitdoc-maven-plugin</url>
+        <connection>scm:git:git://github.com/omnifaces/renderkitdoc-maven-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:omnifaces/renderkitdoc-maven-plugin.git</developerConnection>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <properties>
         <!-- Java versions. -->
@@ -54,5 +98,106 @@
             <version>1.0</version>
         </dependency>
     </dependencies>
+    
+     <build>
+        <plugins>
+           
+            <!-- Configure the jar with the binaries. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <URL>${project.url}</URL>
+                            <Extension-Name>${project.artifactId}</Extension-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- Configure the jar with the sources. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Configure the jar with the javadoc. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <notimestamp>true</notimestamp>
+                    <splitindex>true</splitindex>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Configure snapshot deployment to Sonatype. -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <profiles>
+        <!-- Release deploy: mvn clean deploy -P release -->
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+
+                    <!-- Signing with GPG is a requirement for a release deployment to Maven central. -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
